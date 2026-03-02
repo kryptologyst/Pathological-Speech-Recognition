@@ -1,0 +1,61 @@
+# @package _global_
+defaults:
+  - config
+  - override /model: conformer
+  - override /training: conformer_training
+
+# Conformer model configuration
+model:
+  name: "conformer"
+  encoder_dim: 144
+  num_encoder_layers: 16
+  num_attention_heads: 4
+  feed_forward_expansion_factor: 4
+  conv_expansion_factor: 2
+  input_dropout_p: 0.1
+  feed_forward_dropout_p: 0.1
+  attention_dropout_p: 0.1
+  conv_dropout_p: 0.1
+  conv_kernel_size: 31
+  half_step_residual: true
+  
+  # CTC decoder
+  decoder_dim: 320
+  num_decoder_layers: 1
+  decoder_dropout_p: 0.1
+  
+  # Vocabulary
+  vocab_size: 32
+  blank_id: 0
+  sos_id: 1
+  eos_id: 2
+  pad_id: 3
+
+# Conformer training configuration
+training:
+  batch_size: 4
+  num_epochs: 20
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  warmup_steps: 2000
+  max_grad_norm: 1.0
+  gradient_accumulation_steps: 8
+  
+  # Conformer specific
+  label_smoothing: 0.1
+  ctc_weight: 0.3
+  attention_weight: 0.7
+  
+  # Optimizer
+  optimizer: "adamw"
+  adam_beta1: 0.9
+  adam_beta2: 0.98
+  adam_epsilon: 1e-9
+  
+  # Scheduler
+  lr_scheduler_type: "cosine"
+  num_warmup_steps: 2000
+  
+  # Mixed precision
+  fp16: true
+  bf16: false

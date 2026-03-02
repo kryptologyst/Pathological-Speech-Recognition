@@ -1,0 +1,169 @@
+# @package _global_
+defaults:
+  - _self_
+  - model: wav2vec2
+  - data: pathological_speech
+  - training: default
+  - evaluation: wer_cer
+
+# Experiment configuration
+experiment_name: "pathological_speech_recognition"
+seed: 42
+device: auto  # auto, cpu, cuda, mps
+
+# Paths
+data_dir: "data"
+checkpoint_dir: "checkpoints"
+output_dir: "assets/outputs"
+log_dir: "logs"
+
+# Privacy and ethics
+privacy_mode: true
+anonymize_filenames: true
+log_level: "INFO"
+
+# Model configuration
+model:
+  name: "wav2vec2"
+  pretrained_model: "facebook/wav2vec2-large-960h"
+  freeze_feature_extractor: false
+  vocab_size: 32
+  hidden_size: 1024
+  num_attention_heads: 16
+  num_hidden_layers: 24
+  intermediate_size: 4096
+  hidden_act: "gelu"
+  hidden_dropout: 0.1
+  attention_dropout: 0.1
+  feat_extract_dropout: 0.0
+  feat_proj_dropout: 0.0
+  final_dropout: 0.1
+  layerdrop: 0.1
+  initializer_range: 0.02
+  vocab_size: 32
+  do_stable_layer_norm: false
+  apply_spec_augment: true
+  mask_time_prob: 0.05
+  mask_time_length: 10
+  mask_feature_prob: 0.0
+  mask_feature_length: 10
+  ctc_loss_reduction: "mean"
+  ctc_zero_infinity: false
+  use_weighted_layer_sum: false
+  classifier_proj_size: 256
+
+# Data configuration
+data:
+  dataset_name: "pathological_speech"
+  train_split: "train"
+  val_split: "validation"
+  test_split: "test"
+  max_duration: 20.0
+  min_duration: 0.5
+  sampling_rate: 16000
+  normalize: true
+  preemphasis: 0.97
+  
+  # Augmentation for pathological speech
+  augmentation:
+    speed_perturb: true
+    pitch_shift: true
+    add_noise: true
+    add_reverb: true
+    time_stretch: true
+    volume_scale: true
+    
+    # Pathological speech specific augmentations
+    tremor_simulation: true
+    slur_simulation: true
+    volume_reduction: true
+    
+  # Feature extraction
+  features:
+    feature_type: "wav2vec2"  # wav2vec2, log_mel, mfcc
+    n_fft: 512
+    hop_length: 160
+    win_length: 400
+    n_mels: 80
+    f_min: 0
+    f_max: 8000
+    center: true
+    pad_mode: "reflect"
+
+# Training configuration
+training:
+  batch_size: 8
+  num_epochs: 10
+  learning_rate: 1e-5
+  weight_decay: 0.01
+  warmup_steps: 1000
+  max_grad_norm: 1.0
+  gradient_accumulation_steps: 4
+  save_strategy: "epoch"
+  eval_strategy: "epoch"
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "wer"
+  greater_is_better: false
+  
+  # Optimizer
+  optimizer: "adamw"
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  adam_epsilon: 1e-8
+  
+  # Scheduler
+  lr_scheduler_type: "linear"
+  num_warmup_steps: 1000
+  
+  # Mixed precision
+  fp16: false
+  bf16: false
+  
+  # Logging
+  logging_steps: 100
+  eval_steps: 500
+  save_steps: 500
+
+# Evaluation configuration
+evaluation:
+  metrics:
+    - "wer"
+    - "cer"
+    - "bleu"
+    - "rouge"
+  
+  # Pathological speech specific metrics
+  pathological_metrics:
+    - "intelligibility_score"
+    - "fluency_score"
+    - "articulation_score"
+  
+  # Confidence calibration
+  confidence_calibration: true
+  
+  # Error analysis
+  error_analysis: true
+  save_predictions: true
+  save_audio_samples: true
+
+# Inference configuration
+inference:
+  batch_size: 1
+  max_length: 448
+  num_beams: 1
+  early_stopping: false
+  length_penalty: 1.0
+  no_repeat_ngram_size: 0
+  temperature: 1.0
+  do_sample: false
+  top_k: 50
+  top_p: 1.0
+  
+  # Post-processing
+  post_process:
+    normalize_whitespace: true
+    remove_punctuation: false
+    case_sensitive: false
+    add_punctuation: true
+    add_capitalization: true
